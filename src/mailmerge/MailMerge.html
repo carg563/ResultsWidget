@@ -1,0 +1,17 @@
+<div class= "jimu-widget-mailmerge">
+    <div style="margin-top:15px;" class="jimu-widget-mailmerge-section">Select output template</div>
+    <div data-dojo-type="dijit/form/Form" id="templatePicker" data-dojo-attach-point="templatePicker">
+        <div class="jimu-widget-mailmerge-section">
+            <input type="radio" name="template" data-dojo-type="dijit/form/RadioButton" id="owner" value ="owner" checked ="checked" /> <label for="owner">Owner</label>
+        </div>
+        <div class="jimu-widget-mailmerge-section">
+            <input type="radio" name="template" data-dojo-type="dijit/form/RadioButton" id="ratepayer" value="ratepayer" /> <label for="ratepayer">Rate payer</label>
+        </div>
+        <div class="divider"></div>
+        <div style="margin-top:15px;" class="jimu-widget-mailmerge-section">
+            <input type="checkbox"  data-dojo-attach-point="concatenateAddress" data-dojo-type="dijit/form/CheckBox" id="concatenateAddress"/> <label for="concatenateAddress">Concatenate Address</label>
+        </div>
+    </div>
+    <div style="display:none;" class= 'jimu-widget-mailmerge-loadingmask' data-dojo-attach-point="loadingMask"></div>
+</div>
+

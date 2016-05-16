@@ -1,0 +1,20 @@
+{
+	"owner": {
+		"url": "https://secure.gbs.co.nz/arcgis/rest/services/Prod_Demos/TCDCDemo/MapServer/22",
+		"field": "PropKey",
+		"groupByFields": ["ContactKey"],
+		"outFields": ["*"],
+		"defaultExcludeFields": ["OBJECTID"],
+		"excludeFieldsOnConcatenateMode": ["OBJECTID", "PropKey"],
+		"concatFields": ["PhysicalAddress"]
+	},
+	"ratepayer": {
+		"url": "https://secure.gbs.co.nz/arcgis/rest/services/Prod_Demos/TCDCDemo/MapServer/23",
+		"field": "PropKey",
+		"groupByFields": ["Ratepayer"],
+		"outFields": ["*"],
+		"defaultExcludeFields": ["OBJECTID"],
+		"excludeFieldsOnConcatenateMode": ["OBJECTID", "PropKey"],
+		"concatFields": ["PhysicalAddress"]
+	}
+}

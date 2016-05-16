@@ -1,0 +1,177 @@
+@import url("EnhancedGrid.css");
+.jimu-widget-resultswidget {
+    position:relative;
+    width:100%;
+    height:100%;
+}
+.jimu-widget-resultswidget .active {
+    display:block !important;
+}
+.jimu-widget-resultswidget .inactive {
+    display:none !important;
+}
+.jimu-widget-resultswidget-header{
+     position:relative;
+     height:35px;
+     width:100%;
+     margin:0 auto;
+     padding:0px !important;
+}
+.jimu-widget-resultswidget-dataview {
+   width:100%;
+   position:absolute;
+   margin:0 auto;
+   top:40px;
+   bottom:0px;
+   height:auto;
+   padding:0px !important;
+}
+.jimu-widget-resultswidget-resetview {
+   width:100%;
+   position:relative;
+   margin:0 auto;
+   text-align:center;
+   padding:0px !important;
+}
+.resultswidget-tbar-btn {
+    position:relative;
+    float:right;
+    width:24px;
+    height:24px;
+    margin:4px 0 0 2px !important;
+}
+.resultswidget-tbar-btn .dijitButtonNode{
+    height: 100% !important;
+    width:  100% !important;
+    padding:0px !important;
+    background:none !important;
+    border:none !important;
+    margin:0 !important;
+    border-radius:0px !important;
+    box-shadow:none !important;
+}
+.resultswidget-tbar-btn .dijitButtonNode .dijitIcon {
+    width:16px;
+    height:16px;
+    margin-top:4px !important;
+}
+
+/* swap view button*/
+.resultswidget-tbar-btn.dijitButton .table-view  {
+    background: url("../images/table.png") center center no-repeat;
+}
+.resultswidget-tbar-btn.dijitButtonHover .table-view {
+    background: url("../images/table-hover.png") center center no-repeat;
+}
+/* export to csv*/
+.resultswidget-tbar-btn.dijitButton .export {
+    background: url("../images/export-csv.png") center center no-repeat;
+}
+.resultswidget-tbar-btn.dijitButtonHover .export{
+    background: url("../images/export-csv-hover.png") center center no-repeat;
+}
+/* zoom to feature*/
+.resultswidget-tbar-btn.dijitButton .zoom-to {
+    background: url("../images/zoom.png") center center no-repeat;
+}
+.resultswidget-tbar-btn.dijitButtonHover .zoom-to{
+    background: url("../images/zoom-hover.png") center center no-repeat;
+}
+/*clear button*/
+.resultswidget-tbar-btn.dijitButton  .clear {
+     background: url("../images/close.png") center center no-repeat;
+}
+.resultswidget-tbar-btn.dijitButtonHover .clear{
+    background: url("../images/close-hover.png") center center no-repeat;
+}
+
+/*grids*/
+.resultswidget-attr-grid {
+
+}
+.resultswidget-table-grid {
+  
+}
+.resultswidget-attr-grid-hover {
+    cursor:text;
+}
+.resultswidget-table-grid-hover{
+    cursor:pointer;
+}
+
+/*removing skype symbols*/
+span.skype_pnh_container {display:none !important;}
+span.skype_pnh_print_container, span[class^="skype_pnh_print_container"] {display:inline !important;} 
+
+
+/*lim button*/
+.resultswidget-tbar-btn.dijitButton  .lim {
+     background: url("../images/lim.png") center center no-repeat;
+}
+.resultswidget-tbar-btn.dijitButtonHover .lim{
+    background: url("../images/lim-hover.png") center center no-repeat;
+}
+.limspinner {
+    width:40px;height:40px;position:relative;float:left;
+    background: url("../images/spinner.gif") center center no-repeat;
+}
+
+
+
+/*mailmerge button*/
+.resultswidget-tbar-btn.dijitButton  .mailmerge {
+     background: url("../images/mm.png") center center no-repeat;
+}
+.resultswidget-tbar-btn.dijitButtonHover .mailmerge{
+    background: url("../images/mm-hover.png") center center no-repeat;
+}
+
+/* fix for changing width for layer list*/
+        
+.resultswidget-tbar-layerlist .dijitSelectLabel {
+    width: 140px !important;
+    -moz-box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* mail merge */
+.jimu-widget-mailmerge{
+    font-size:14px !important;
+    color: #838383;
+    white-space:nowrap;
+}
+.mailmerge-cntr .close-btn {
+    width:16px;
+    height:16px;
+    background: url("../images/sprite.png");
+    background-position: 0px 226px;
+}
+.mailmerge-cntr .close-btn:hover {
+    background-position: -21px 226px;
+}
+.mailmerge-cntr .content-static {
+    margin-top:0px !important;
+}
+.jimu-widget-mailmerge-section {
+    width:100%;
+    position: relative;
+    height:30px;
+}
+.jimu-widget-mailmerge .divider {
+    height:1px;
+    width:100%;
+    position:relative;
+    border-bottom: 1px solid #e3ecf2;
+}
+.jimu-widget-mailmerge-loadingmask{
+    width:100%;
+    height:100%;
+    position:absolute;
+    z-index:9999;
+    opacity:0.7;
+    top:0px;
+    background: url("../images/spinner.gif") center center no-repeat;
+}
+.jimu-widget-resultswidget a,.jimu-widget-resultswidget a:visited{
+    color:blue;
+}

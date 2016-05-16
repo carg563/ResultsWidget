@@ -1,0 +1,93 @@
+.jimu-widget-resultwidget-setting {
+    color:#596679;
+    font-size:14px;
+}
+.jimu-widget-resultwidget-setting-cb {
+    position:relative;
+    float:left;
+    width:100%;
+    color:#596679;
+    margin-top:20px;
+}
+.jimu-widget-resultwidget-setting .section {
+    position:relative;
+    width:100%;
+    float:left;
+    overflow:auto;
+}
+.jimu-widget-resultwidget-setting .title {
+    position: relative;
+    color: #596679;
+    font-size: 14px;
+    border-bottom: 1px solid #ccc;
+    width: 100%;
+    float: left;
+    padding-bottom: 10px;
+}
+
+.jimu-widget-resultwidget-setting .form-table {
+    width:100%;
+    position: relative;
+    margin-top: 10px;
+    display: inline-block;
+}
+.jimu-widget-resultwidget-setting .form-table td {
+    padding-bottom:10px;
+}
+.jimu-widget-resultwidget-setting .form-table td.first {
+    width: 150px;
+}
+
+.records-per-page-setting {
+    width:100%;
+    position: relative;
+    margin-top: 10px;
+    display: inline-block;
+    color:#596679;
+    font-size:14px;
+}
+.records-per-page-setting td {
+    padding-bottom:10px;
+}
+.records-per-page-setting td.first {
+    width:120px;
+}
+
+.jimu-widget-resultwidget-setting .add-exclude-fields{
+  margin-bottom: 7px;
+  cursor: pointer;
+  display: inline-block;
+  position:relative;
+  float:left;
+}
+
+.jimu-widget-resultwidget-setting .add-icon{
+  background-image: url(images/add_icon.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+
+
+.jimu-widget-resultwidget-setting .add-label{
+  font-size: 14px;
+  color: #518dca;
+  margin-left: 10px;
+  /* line-height: 24px; */
+  display: inline-block;
+  height: 100%;
+  text-decoration: underline;
+}
+.jimu-widget-resultwidget-setting .exclude-table {
+    position:relative;
+    width:100%;
+    float:left;
+    max-height:250px;
+    overflow:auto;
+    font-size:14px !important;
+}
+

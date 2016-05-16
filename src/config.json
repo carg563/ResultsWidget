@@ -1,0 +1,12 @@
+{
+	"excludedFields":["OBJECTID","SHAPE","GlobalID"],
+	"highlightFeatureOnRecordSelect":true,
+	"zoomToFeature":true,
+	"exportToCSV":true,
+	"recordsPerPage":30,
+	"mailMerge":{
+		"enabled":true,
+		"mailMergeLayer":""
+	}
+
+}

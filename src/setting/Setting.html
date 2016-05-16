@@ -1,0 +1,40 @@
+<div>
+    <div data-dojo-type="jimu/dijit/CheckBox" data-dojo-attach-point="highlightFeatureOnRecordSelect" data-dojo-props='label:"${nls.highlightFeatureOnRecordSelect}"' class="jimu-widget-resultwidget-setting-cb"></div>
+    <div data-dojo-type="jimu/dijit/CheckBox" data-dojo-attach-point="zoomToFeature" data-dojo-props='label:"${nls.zoomToFeature}"' class="jimu-widget-resultwidget-setting-cb"></div>
+    <div data-dojo-type="jimu/dijit/CheckBox" data-dojo-attach-point="exportToCSV" data-dojo-props='label:"${nls.exportToCSV}"' class="jimu-widget-resultwidget-setting-cb"></div>
+    <div class="section">
+        <div class="title">
+            <div data-dojo-type="jimu/dijit/CheckBox" data-dojo-attach-point="mailMerge" data-dojo-props='label:"${nls.mailMerge}"' class="jimu-widget-resultwidget-setting-cb"></div>
+        </div>
+        <table cellspacing="0" class="form-table">
+            <tbody>
+                <tr>
+                    <td class="first" style="width:200px;">${nls.mailMergeLayer}</td>
+                    <td class="second">
+                        <input type="text" data-dojo-type="dijit/form/TextBox"
+                               data-dojo-attach-point="mailMergeLayer"
+                               data-dojo-props="style:{width:'600px',marginLeft:'10px'}" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <table cellspacing="0" class="records-per-page-setting">
+        <tbody>
+            <tr>
+                <td class="first">${nls.recordsPerPage}</td>
+                <td class="second">
+                    <input type="text" data-dojo-type="dijit/form/TextBox"
+                           data-dojo-attach-point="recordsPerPage"
+                           data-dojo-props="style:{width:'50px',marginLeft:'10px'}" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="add-exclude-fields" style="margin-top:20px;">
+        <span class="add-icon"></span>
+        <span class="add-label" data-dojo-attach-point="addFieldsLabel">${nls.addFieldsToExclude}</span>
+    </div>
+    <div class="exclude-table" data-dojo-attach-point="excludeFieldsTableCntr"></div>
+</div>
+
