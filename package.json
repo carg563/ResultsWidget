@@ -1,0 +1,25 @@
+{
+  "name": "nzgisco-results-widget",
+  "version": "1.4.0",
+  "description": "Widget which displays results of interrogate operations.",
+  "files": [ "src" ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LocalMaps/ResultsWidget.git"
+  },
+  "keywords": [
+    "LocalMaps",
+    "Widget",
+    "Results",
+    "Interrogate"
+  ],
+  "author": "GISCO & GBS & LocalMaps",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "bugs": {
+    "url": "https://github.com/LocalMaps/ResultsWidget/issues"
+  },
+  "homepage": "https://github.com/LocalMaps/ResultsWidget#readme"
+}
