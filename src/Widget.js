@@ -12,6 +12,7 @@ define([
     'dijit/_WidgetsInTemplateMixin',
     'dijit/_TemplatedMixin',
     'jimu/BaseWidget',
+    'jimu/WidgetManager',
     'dojo/dom-construct',
     'jimu/PanelManager',
     'jimu/dijit/LoadingShelter',
@@ -30,7 +31,7 @@ define([
     "dojox/grid/enhanced/plugins/Pagination"
 ],
 function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, domAttr, _WidgetsInTemplateMixin, _TemplatedMixin,
-    BaseWidget, domConstruct, PanelManager, LoadingShelter,
+    BaseWidget, WidgetManager, domConstruct, PanelManager, LoadingShelter,
     ObjectStore, Memory, ItemFileWriteStore,ObjectStoreModel,Tree, Button, Select,Message, CsvGenerator, LimTool,MailMerge, EnhancedGrid
     ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin, _TemplatedMixin], {
@@ -44,6 +45,8 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
     _isTabularView: false,
     _isTreeView:false,
     _limLayer: 'Parcel Boundaries',
+    _giscoSelectWidgetName: null,
+    _localMapsHeaderWidgetName: null,
     postCreate: function () {
         this.inherited(arguments);
         //resizing the width of this widget
@@ -53,14 +56,32 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
     },
     startup: function () {
         this.inherited(arguments);
+
+        this._giscoSelectWidgetName = this._checkWidgetExistsUsingPropName('isGISCOSelectWidget');
+        this._localMapsHeaderWidgetName = this._checkWidgetExistsUsingPropName('isLocalMapsHeader');
+        
+        if (this._giscoSelectWidgetName !== null) {
+
+            this.historyUI.addChild(new Button({
+                label: this.nls.historySelect,
+                onClick: lang.hitch(this, function () {
+                    if (this._localMapsHeaderWidgetName !== null) {
+                        this._displayLocalMapsWidget(this._localMapsHeaderWidgetName, this._giscoSelectWidgetName);
+                    } else {
+                        this._hideWidgetPanel(this.id + '_panel');
+                        this._displayWidgetPanel(this._giscoSelectWidgetName);
+                    }                    
+                })
+            }));
+        }
+
         this._createLoadingShelter();
         this._populateToolbar();
         this._renderTabularView();
         this._renderAttributeView();
         this._renderTreeView();
         this._enableResetView();
-        this._setVersionTitle();
-
+        this._setVersionTitle();   
     },
     _createLoadingShelter:function(){
         this.shelter = new LoadingShelter({
@@ -135,7 +156,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         });
 
         // mail merge tool 
-        if (this.config.mailMerge.enabled) {
+        if (this.config.mailMerge !== null && this.config.mailMerge.enabled) {
             this.mmTool = new Button({
                 showLabel: false,
                 'class': 'resultswidget-tbar-btn',
@@ -894,6 +915,65 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         }
         return labelNode;
 
+    },
+    _checkWidgetExistsUsingPropName: function (propNameToCheck) {
+        var widgetName = null;
+        var allWidgets = []
+        if (this.appConfig.widgetOnScreen) {
+            allWidgets = [].concat(this.appConfig.widgetOnScreen.widgets);
+        }
+        if (this.appConfig.widgetPool) {
+            allWidgets = allWidgets.concat(this.appConfig.widgetPool.widgets);
+        }
+        array.some(allWidgets, lang.hitch(this, function (widget) {
+            var isWidgetConfigured = widget.manifest ? (widget.manifest.hasOwnProperty("properties") ? (widget.manifest.properties[propNameToCheck] ? true : false) : false) : false;
+            if (isWidgetConfigured) {
+                widgetName = widget.name;
+            }
+        }));
+        return widgetName;
+    },
+    _hideWidgetPanel: function (panelId) {
+
+        if (panelId === null || panelId === '') return;
+
+        PanelManager.getInstance().closePanel(panelId);
+    },
+    _displayWidgetPanel: function (widgetName) {
+
+        if (widgetName === null || widgetName === '') return;
+
+        var widgetManager = WidgetManager.getInstance();
+        var widget = widgetManager.getWidgetsByName(widgetName);
+        var widgetLoaded = widget.length > 0;
+        
+        if (widgetLoaded) {
+            widget = widget[0];
+            if (widget.state === 'closed') {                    
+                widgetManager.openWidget(widget);
+                PanelManager.getInstance().showPanel(widget);                    
+            }
+        } else {
+            var loadWidget = this.appConfig.getConfigElementsByName(widgetName)[0];
+            if (loadWidget) {
+                this.openWidgetById(loadWidget.id);
+            } 
+        }        
+    },
+    _displayLocalMapsWidget: function (headerWidgetName, widgetToLoadName) {
+
+        if (headerWidgetName === null || headerWidgetName === '' || widgetToLoadName === null || widgetToLoadName === '') return;
+
+        var widgetManager = WidgetManager.getInstance();
+        var headerWidget = widgetManager.getWidgetsByName(widgetName);
+        var widgetToLoad = widgetManager.getWidgetsByName(widgetToLoadName);
+
+        if (headerWidget === null || widgetToLoad === null) {
+            console.warn('Unable to find both ' + headerWidgetName + ' and ' + widgetToLoadName  + ' widgets.');
+            return;
+        }
+
+        headerWidget.openNewNode(widgetToLoad.id);        
     }
   });
 });

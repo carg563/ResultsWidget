@@ -7,6 +7,7 @@ define({
       zoomToFeature: "Click here to zoom to selected feature.If no feature is selected,map will be zoomed to entire features.",
       exportToCSV: "Export the records in the view to csv file",
       clear: "Clear results",
-      mailMerge:"Mail merge"
+      mailMerge:"Mail merge",
+      historySelect: "Go to the select tool"
   })
 });
