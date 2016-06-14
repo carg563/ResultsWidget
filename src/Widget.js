@@ -46,7 +46,6 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
     _isTreeView:false,
     _limLayer: 'Parcel Boundaries',
     _giscoSelectWidgetName: null,
-    _localMapsHeaderWidgetName: null,
     postCreate: function () {
         this.inherited(arguments);
         //resizing the width of this widget
@@ -58,19 +57,14 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         this.inherited(arguments);
 
         this._giscoSelectWidgetName = this._checkWidgetExistsUsingPropName('isGISCOSelectWidget');
-        this._localMapsHeaderWidgetName = this._checkWidgetExistsUsingPropName('isLocalMapsHeader');
         
         if (this._giscoSelectWidgetName !== null) {
 
             this.historyUI.addChild(new Button({
                 label: this.nls.historySelect,
-                onClick: lang.hitch(this, function () {
-                    if (this._localMapsHeaderWidgetName !== null) {
-                        this._displayLocalMapsWidget(this._localMapsHeaderWidgetName, this._giscoSelectWidgetName);
-                    } else {
-                        this._hideWidgetPanel(this.id + '_panel');
-                        this._displayWidgetPanel(this._giscoSelectWidgetName);
-                    }                    
+                onClick: lang.hitch(this, function () {                    
+                    this._hideWidgetPanel(this.id + '_panel');
+                    this._displayWidgetPanel(this._giscoSelectWidgetName);
                 })
             }));
         }
@@ -959,21 +953,6 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
                 this.openWidgetById(loadWidget.id);
             } 
         }        
-    },
-    _displayLocalMapsWidget: function (headerWidgetName, widgetToLoadName) {
-
-        if (headerWidgetName === null || headerWidgetName === '' || widgetToLoadName === null || widgetToLoadName === '') return;
-
-        var widgetManager = WidgetManager.getInstance();
-        var headerWidget = widgetManager.getWidgetsByName(headerWidgetName);
-        var widgetToLoad = widgetManager.getWidgetsByName(widgetToLoadName);
-
-        if (headerWidget === null || widgetToLoad === null) {
-            console.warn('Unable to find both ' + headerWidgetName + ' and ' + widgetToLoadName  + ' widgets.');
-            return;
-        }
-
-        headerWidget.openNewNode(widgetToLoad.id);        
     }
   });
 });
