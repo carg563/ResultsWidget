@@ -965,7 +965,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         if (headerWidgetName === null || headerWidgetName === '' || widgetToLoadName === null || widgetToLoadName === '') return;
 
         var widgetManager = WidgetManager.getInstance();
-        var headerWidget = widgetManager.getWidgetsByName(widgetName);
+        var headerWidget = widgetManager.getWidgetsByName(headerWidgetName);
         var widgetToLoad = widgetManager.getWidgetsByName(widgetToLoadName);
 
         if (headerWidget === null || widgetToLoad === null) {
