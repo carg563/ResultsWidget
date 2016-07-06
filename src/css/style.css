@@ -18,8 +18,11 @@
      padding:0px !important;
 }
 .jimu-widget-resultswidget-dataview {
+   position:absolute;
    width:100%;   
    margin:0 auto;
+   top:80px;
+   bottom:0px;
    height:auto;
    padding:0px !important;
 }

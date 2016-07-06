@@ -1,6 +1,6 @@
 {
   "name": "nzgisco-results-widget",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Widget which displays results of interrogate operations.",
   "files": [ "src" ],
   "scripts": {
