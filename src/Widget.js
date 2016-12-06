@@ -1,6 +1,7 @@
 define([
     'dojo/_base/declare',
     'dojo/_base/lang',
+    'dojo/_base/Color',
     'dojo/_base/array',
     'dojo/dom-style',
     'dojo/dom-class',
@@ -28,11 +29,16 @@ define([
     './LimTool',
     './mailmerge/MailMerge',
     "dojox/grid/EnhancedGrid",
+    "dojox/grid/enhanced/plugins/Menu",
+    "dijit/Menu",
+    'esri/graphic',
+    'esri/symbols/TextSymbol',
+    'esri/symbols/Font',
     "dojox/grid/enhanced/plugins/Pagination"
 ],
-function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, domAttr, _WidgetsInTemplateMixin, _TemplatedMixin,
+function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, domQuery, domAttr, _WidgetsInTemplateMixin, _TemplatedMixin,
     BaseWidget, WidgetManager, domConstruct, PanelManager, LoadingShelter,
-    ObjectStore, Memory, ItemFileWriteStore,ObjectStoreModel,Tree, Button, Select,Message, CsvGenerator, LimTool,MailMerge, EnhancedGrid
+    ObjectStore, Memory, ItemFileWriteStore, ObjectStoreModel, Tree, Button, Select, Message, CsvGenerator, LimTool, MailMerge, EnhancedGrid, Menu, MenuItem, Graphic, TextSymbol, Font
     ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin, _TemplatedMixin], {
     baseClass: 'jimu-widget-resultswidget',
@@ -448,7 +454,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         var uniqueId = this.layerList.get("value");
         var response = this._getResponse(uniqueId);
         return response;
-    },
+    },    
     _renderAttributeView: function () {
         var data = {
             identifier: 'attribute',
@@ -480,6 +486,46 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
                 }
             }
         ];
+        
+        var menusObject = {
+            selectedRegionMenu: new dijit.Menu()
+        };
+        
+        var menuItem = new dijit.MenuItem({
+            label: "Add label to results layer", onClick: lang.hitch(this, function () {
+                
+                var selectedItems = this.multiRecordsView.selection.getSelected();
+                var selectedFeatures = [];
+                var response = this._getResponseInContext();
+                array.forEach(selectedItems, lang.hitch(this, function (item) {
+                    var rowIndex = this.multiRecordsView.getItemIndex(item);
+                    rowIndex = this._getActualIndexInStore(rowIndex, this.multiRecordsView);
+                    selectedFeatures.push(response.features[rowIndex]);
+                }));
+
+                if (selectedFeatures.length < 1) return;
+
+                var geometry = selectedFeatures[0].geometry;
+
+                if (!geometry) return;
+
+                var b = Font.VARIANT_NORMAL;
+                var c = Font.WEIGHT_BOLD;
+                var symbolFont = new Font("14px", a, b, c, "Arial");                
+
+                var textSymbol = new TextSymbol(this.selectedGridLabelValue, symbolFont, new Color([0, 0, 0, 1]));
+                textSymbol.setHorizontalAlignment('left');
+                var labelGraphic = new Graphic(geometry.type.toLowerCase() == 'point' ? geometry : geometry.getExtent().getCenter(), textSymbol);
+
+                if (this.hasMapUtil()) {
+                    this._mapUtil.addResultsToMap(this.map, [{ features: [labelGraphic] }], this._resultsSymbology, false, false, this._zoomConfig);
+                }
+            })
+        });
+
+        menusObject.selectedRegionMenu.addChild(menuItem);
+        menusObject.selectedRegionMenu.startup();
+
         /*create a new grid:*/
         this.singleRecordView = new EnhancedGrid({
             store: store,
@@ -492,12 +538,24 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             selectable: true,
             keepRows: 100,
             rowsPerPage: 100,
-            autoHeight: true
+            autoHeight: true,
+            plugins : {menus: menusObject}
         });
+
+        dojo.connect(this.singleRecordView, 'onRowContextMenu', lang.hitch(this, function (e) {
+            
+            var selected = e.grid.selection.getSelected();
+            var text = '';
+            for (var i = 0; i < selected.length; i++) {
+
+                var item = selected[i];
+                text += item.attribute[0] + ': ' + item.value[0] + '\n';
+            }
+            this.selectedGridLabelValue = text;
+        }));
      
         this.singleRecordViewCntr.addChild(this.singleRecordView);
-        this.singleRecordView.startup();
-       
+        this.singleRecordView.startup();       
     },
     _renderTreeView:function(){
         var dummyStore = new Memory({
@@ -522,8 +580,14 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             this._resizeGrid(this.multiRecordsView)
         }
     },
-    _resizeGrid:function(grid){
+    _resizeGrid: function (grid) {
+
+        if (!grid || !grid.getParent()) return;
+
         var cont = grid.getParent().domNode;
+
+        if (!cont) return;
+
         var h = cont.clientHeight - 4;
         var w = cont.clientWidth;
         if (h >= 0) {
