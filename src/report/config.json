@@ -1,0 +1,22 @@
+﻿{
+  "url": "https://sdcgisweb2.sdc.selwyn.local/arcgis/rest/services/WidgetsAndReporting/ReportsWrapper/GPServer/ReportsWrapperTool",
+  "templates": [
+    {
+      "name": "Zone Info LIMs",
+      "value": "zonelim",
+      "type": "id"
+    },
+    {
+      "name": "Zone Info PIMs",
+      "value": "zonepim",
+      "type": "point"
+    },
+    {
+      "name": "Resource Consent Mapping",
+      "value": "Consent",
+      "type": "id",
+      "allowBuffer": true,
+      "allowExcel": true
+    }
+  ]
+}

@@ -28,6 +28,8 @@ define([
     'jimu/CustomUtils/CsvGenerator',
     './LimTool',
     './mailmerge/MailMerge',
+    'jimu/dijit/Popup',
+    './report/Report',
     "dojox/grid/EnhancedGrid",
     "dojox/grid/enhanced/plugins/Menu",
     "dijit/Menu",
@@ -38,7 +40,7 @@ define([
 ],
 function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, domQuery, domAttr, _WidgetsInTemplateMixin, _TemplatedMixin,
     BaseWidget, WidgetManager, domConstruct, PanelManager, LoadingShelter,
-    ObjectStore, Memory, ItemFileWriteStore, ObjectStoreModel, Tree, Button, Select, Message, CsvGenerator, LimTool, MailMerge, EnhancedGrid, Menu, MenuItem, Graphic, TextSymbol, Font
+    ObjectStore, Memory, ItemFileWriteStore, ObjectStoreModel, Tree, Button, Select, Message, CsvGenerator, LimTool, MailMerge, Popup, Report, EnhancedGrid, Menu, MenuItem, Graphic, TextSymbol, Font
     ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin, _TemplatedMixin], {
     baseClass: 'jimu-widget-resultswidget',
@@ -168,8 +170,7 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
                 })
             });
         }
-
-
+        
         //tewmp tool
         this.limTool = new Button({
             showLabel: false,
@@ -182,7 +183,18 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
             })
         })
 
-       
+        if (this.config.report) {
+            this.reportTool = new Button({
+                showLabel: false,
+                'class': 'resultswidget-tbar-btn',
+                iconClass: "report",
+                title: 'Report',
+                style: "float:right;display:none;",
+                onClick: lang.hitch(this, function () {
+                    this._showReportTool();
+                })
+            });
+        }
         
 
         this.toolbar.addChild(clearBtn);
@@ -196,7 +208,10 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
         if (this.config.mailMerge.enabled) {
             this.toolbar.addChild(this.mmTool);
         }
-        this.toolbar.addChild(this.limTool)
+        this.toolbar.addChild(this.limTool);
+        if (this.config.report) {
+            this.toolbar.addChild(this.reportTool);
+        }
     },
     _handleLayerChange:function(){
         var id = this.layerList.get("value");
@@ -689,6 +704,14 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
             }
         }
 
+        if (this.config.report) {
+            if (res.name === this.config.report.layer) {
+                domStyle.set(this.reportTool.domNode, "display", "block");
+            } else {
+                domStyle.set(this.reportTool.domNode, "display", "none");
+            }
+        }
+        
         //temp code
         if (res.name === this._limLayer) {
             domStyle.set(this.limTool.domNode, "display", "block");
@@ -725,6 +748,9 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
             }
         }
 
+        if (this.config.report) {
+            domStyle.set(this.reportTool.domNode, "display", "none");
+        }
 
         //temp code
         domStyle.set(this.limTool.domNode, "display", "none");
@@ -747,6 +773,9 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
             domStyle.set(this.mmTool.domNode, "display", "none");
         }
 
+        if (this.config.report) {
+            domStyle.set(this.reportTool.domNode, "display", "none");
+        }
         //temp code
         domStyle.set(this.limTool.domNode, "display", "none");
 
@@ -880,6 +909,7 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
             this._mapUtil.clearResultsFromMap(this.map);
         }
         this._destoryMailMerge();
+        this._destroyReport();
         this.inherited(arguments);
     },
     _getMailMergeData: function () {
@@ -943,6 +973,50 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
             this.mailMergeWin.close();
         }
     },
+
+    _getReportToolFeatures: function () {
+
+        var selectedItems = this.multiRecordsView.selection.getSelected();
+        var selectedFeatures = [];
+        var response = this._getResponseInContext();
+        array.forEach(selectedItems, lang.hitch(this, function (item) {
+            var rowIndex = this.multiRecordsView.getItemIndex(item);
+            rowIndex = this._getActualIndexInStore(rowIndex, this.multiRecordsView);
+            selectedFeatures.push(response.features[rowIndex]);
+        }));
+
+        return selectedFeatures;
+    },
+        
+    _showReportTool: function () {
+        var report = new Report();
+        this.reportWin = new Popup({
+            titleLabel: "Reports",
+            content: report,
+            autoHeight: true,
+            showOverlay: false,
+            buttons: [
+                {
+                    label: "Generate Report",
+                    onClick: lang.hitch(this, function () {
+                        report.execute(this._getReportToolFeatures()).then(lang.hitch(this, function (obj) {
+                            this.reportWin.close();
+                            this.reportWin = null;
+                            report.destroy();
+                        }));
+                    })
+                }
+            ]
+        });
+        report.setMap(this.map);
+    },
+
+    _destroyReport: function () {
+        if (this.reportWin) {
+            this.reportWin.close();
+        }
+    },
+
     _setVersionTitle: function () {
         var labelNode = this._getLabelNode(this);
 

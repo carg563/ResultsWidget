@@ -1,0 +1,42 @@
+﻿<div class="jimu-widget-report">
+    <div class="jimu-report-modes-cntr" data-dojo-attach-point="reportListCntr">
+        <div>Select a report: </div>
+        <div class="jimu-list" data-dojo-type="dijit/form/Select" data-dojo-attach-point="reportList" data-dojo-attach-event="onChange:setControls"></div>
+    </div>
+    <div style="display:none;" data-dojo-attach-point="ctrlzonelim" data-dojo-type="dijit/form/Form"></div>
+    <div style="display:none;" data-dojo-attach-point="ctrlzonepim" data-dojo-type="dijit/form/Form">
+        <table>
+            <tr>
+                <td>
+                    Click on the map to set the location:
+                </td>
+                <td>
+                    <input type="text" data-dojo-type="dijit/form/TextBox" readonly data-dojo-props="name:'replocation',style:'width:340px;'" />
+                </td>
+            </tr>            
+        </table>   
+    </div>
+    <div style="display:none;" data-dojo-attach-point="ctrlresource" data-dojo-type="dijit/form/Form">
+        <table>
+            <tr>
+                <td>
+                    Enter a buffer size: 
+                </td>
+                <td>
+                    <input type="text" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="name:'bufferSize',required:false,value:10,style:'width:100px;'" />
+                </td>
+                <td>Meters</td>
+            </tr>
+            <tr>
+                <td>
+                    Include Excel
+                </td>
+                <td colspan="2">
+                    <input type="checkbox" data-dojo-type="dijit/form/CheckBox" data-dojo-props="name:'includeExcel',value:false,checked:false" />
+                </td>
+            </tr>
+        </table>   
+    </div>
+    <div style="display:none;" class='jimu-widget-report-loadingmask' data-dojo-attach-point="loadingMask"></div>
+</div>
+
