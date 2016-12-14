@@ -138,11 +138,11 @@ function (declare, lang, array, on, domStyle, BaseWidget, _TemplatedMixin, _Widg
                                 if (output.value.ReportsUrls.indexOf('|') > -1) {
 
                                     window.open(output.value.ReportsUrls.split('|')[1]);
-                                    window.location = output.value.ReportsUrls.split('|')[0];
+                                    window.open(output.value.ReportsUrls.split('|')[0]);
                                     
                                 }
                                 else {
-                                    window.location = output.value.ReportsUrls;
+                                    window.open(output.value.ReportsUrls);
                                 }
                             }
                         }

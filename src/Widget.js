@@ -995,6 +995,7 @@ function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, dom
             content: report,
             autoHeight: true,
             showOverlay: false,
+            width: 600,
             buttons: [
                 {
                     label: "Generate Report",
