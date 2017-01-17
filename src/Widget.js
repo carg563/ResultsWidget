@@ -1,6 +1,7 @@
 define([
     'dojo/_base/declare',
     'dojo/_base/lang',
+    'dojo/_base/Color',
     'dojo/_base/array',
     'dojo/dom-style',
     'dojo/dom-class',
@@ -12,6 +13,7 @@ define([
     'dijit/_WidgetsInTemplateMixin',
     'dijit/_TemplatedMixin',
     'jimu/BaseWidget',
+    'jimu/WidgetManager',
     'dojo/dom-construct',
     'jimu/PanelManager',
     'jimu/dijit/LoadingShelter',
@@ -26,12 +28,19 @@ define([
     'jimu/CustomUtils/CsvGenerator',
     './LimTool',
     './mailmerge/MailMerge',
+    'jimu/dijit/Popup',
+    './report/Report',
     "dojox/grid/EnhancedGrid",
+    "dojox/grid/enhanced/plugins/Menu",
+    "dijit/Menu",
+    'esri/graphic',
+    'esri/symbols/TextSymbol',
+    'esri/symbols/Font',
     "dojox/grid/enhanced/plugins/Pagination"
 ],
-function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, domAttr, _WidgetsInTemplateMixin, _TemplatedMixin,
-    BaseWidget, domConstruct, PanelManager, LoadingShelter,
-    ObjectStore, Memory, ItemFileWriteStore,ObjectStoreModel,Tree, Button, Select,Message, CsvGenerator, LimTool,MailMerge, EnhancedGrid
+function (declare, lang, Color, array, domStyle, domClass, on, aspect,topic, domQuery, domAttr, _WidgetsInTemplateMixin, _TemplatedMixin,
+    BaseWidget, WidgetManager, domConstruct, PanelManager, LoadingShelter,
+    ObjectStore, Memory, ItemFileWriteStore, ObjectStoreModel, Tree, Button, Select, Message, CsvGenerator, LimTool, MailMerge, Popup, Report, EnhancedGrid, Menu, MenuItem, Graphic, TextSymbol, Font
     ) {
     return declare([BaseWidget, _WidgetsInTemplateMixin, _TemplatedMixin], {
     baseClass: 'jimu-widget-resultswidget',
@@ -44,6 +53,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
     _isTabularView: false,
     _isTreeView:false,
     _limLayer: 'Parcel Boundaries',
+    _giscoSelectWidgetName: null,
     postCreate: function () {
         this.inherited(arguments);
         //resizing the width of this widget
@@ -53,14 +63,27 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
     },
     startup: function () {
         this.inherited(arguments);
+
+        this._giscoSelectWidgetName = this._checkWidgetExistsUsingPropName('isGISCOSelectWidget');
+        
+        if (this._giscoSelectWidgetName !== null) {
+
+            this.historyUI.addChild(new Button({
+                label: this.nls.historySelect,
+                onClick: lang.hitch(this, function () {                    
+                    this._hideWidgetPanel(this.id + '_panel');
+                    this._displayWidgetPanel(this._giscoSelectWidgetName);
+                })
+            }));
+        }
+
         this._createLoadingShelter();
         this._populateToolbar();
         this._renderTabularView();
         this._renderAttributeView();
         this._renderTreeView();
         this._enableResetView();
-        this._setVersionTitle();
-
+        this._setVersionTitle();   
     },
     _createLoadingShelter:function(){
         this.shelter = new LoadingShelter({
@@ -135,7 +158,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         });
 
         // mail merge tool 
-        if (this.config.mailMerge.enabled) {
+        if (this.config.mailMerge !== null && this.config.mailMerge.enabled) {
             this.mmTool = new Button({
                 showLabel: false,
                 'class': 'resultswidget-tbar-btn',
@@ -147,8 +170,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
                 })
             });
         }
-
-
+        
         //tewmp tool
         this.limTool = new Button({
             showLabel: false,
@@ -161,7 +183,18 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             })
         })
 
-       
+        if (this.config.report) {
+            this.reportTool = new Button({
+                showLabel: false,
+                'class': 'resultswidget-tbar-btn',
+                iconClass: "report",
+                title: 'Report',
+                style: "float:right;display:none;",
+                onClick: lang.hitch(this, function () {
+                    this._showReportTool();
+                })
+            });
+        }
         
 
         this.toolbar.addChild(clearBtn);
@@ -175,7 +208,10 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         if (this.config.mailMerge.enabled) {
             this.toolbar.addChild(this.mmTool);
         }
-        this.toolbar.addChild(this.limTool)
+        this.toolbar.addChild(this.limTool);
+        if (this.config.report) {
+            this.toolbar.addChild(this.reportTool);
+        }
     },
     _handleLayerChange:function(){
         var id = this.layerList.get("value");
@@ -433,7 +469,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         var uniqueId = this.layerList.get("value");
         var response = this._getResponse(uniqueId);
         return response;
-    },
+    },    
     _renderAttributeView: function () {
         var data = {
             identifier: 'attribute',
@@ -465,6 +501,46 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
                 }
             }
         ];
+        
+        var menusObject = {
+            selectedRegionMenu: new dijit.Menu()
+        };
+        
+        var menuItem = new dijit.MenuItem({
+            label: "Add label to results layer", onClick: lang.hitch(this, function () {
+                
+                var selectedItems = this.multiRecordsView.selection.getSelected();
+                var selectedFeatures = [];
+                var response = this._getResponseInContext();
+                array.forEach(selectedItems, lang.hitch(this, function (item) {
+                    var rowIndex = this.multiRecordsView.getItemIndex(item);
+                    rowIndex = this._getActualIndexInStore(rowIndex, this.multiRecordsView);
+                    selectedFeatures.push(response.features[rowIndex]);
+                }));
+
+                if (selectedFeatures.length < 1) return;
+
+                var geometry = selectedFeatures[0].geometry;
+
+                if (!geometry) return;
+
+                var b = Font.VARIANT_NORMAL;
+                var c = Font.WEIGHT_BOLD;
+                var symbolFont = new Font("14px", a, b, c, "Arial");                
+
+                var textSymbol = new TextSymbol(this.selectedGridLabelValue, symbolFont, new Color([0, 0, 0, 1]));
+                textSymbol.setHorizontalAlignment('left');
+                var labelGraphic = new Graphic(geometry.type.toLowerCase() == 'point' ? geometry : geometry.getExtent().getCenter(), textSymbol);
+
+                if (this.hasMapUtil()) {
+                    this._mapUtil.addResultsToMap(this.map, [{ features: [labelGraphic] }], this._resultsSymbology, false, false, this._zoomConfig);
+                }
+            })
+        });
+
+        menusObject.selectedRegionMenu.addChild(menuItem);
+        menusObject.selectedRegionMenu.startup();
+
         /*create a new grid:*/
         this.singleRecordView = new EnhancedGrid({
             store: store,
@@ -477,12 +553,24 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             selectable: true,
             keepRows: 100,
             rowsPerPage: 100,
-            autoHeight: true
+            autoHeight: true,
+            plugins : {menus: menusObject}
         });
+
+        dojo.connect(this.singleRecordView, 'onRowContextMenu', lang.hitch(this, function (e) {
+            
+            var selected = e.grid.selection.getSelected();
+            var text = '';
+            for (var i = 0; i < selected.length; i++) {
+
+                var item = selected[i];
+                text += item.attribute[0] + ': ' + item.value[0] + '\n';
+            }
+            this.selectedGridLabelValue = text;
+        }));
      
         this.singleRecordViewCntr.addChild(this.singleRecordView);
-        this.singleRecordView.startup();
-       
+        this.singleRecordView.startup();       
     },
     _renderTreeView:function(){
         var dummyStore = new Memory({
@@ -507,8 +595,14 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             this._resizeGrid(this.multiRecordsView)
         }
     },
-    _resizeGrid:function(grid){
+    _resizeGrid: function (grid) {
+
+        if (!grid || !grid.getParent()) return;
+
         var cont = grid.getParent().domNode;
+
+        if (!cont) return;
+
         var h = cont.clientHeight - 4;
         var w = cont.clientWidth;
         if (h >= 0) {
@@ -610,6 +704,14 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             }
         }
 
+        if (this.config.report) {
+            if (res.name === this.config.report.layer) {
+                domStyle.set(this.reportTool.domNode, "display", "block");
+            } else {
+                domStyle.set(this.reportTool.domNode, "display", "none");
+            }
+        }
+        
         //temp code
         if (res.name === this._limLayer) {
             domStyle.set(this.limTool.domNode, "display", "block");
@@ -646,6 +748,9 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             }
         }
 
+        if (this.config.report) {
+            domStyle.set(this.reportTool.domNode, "display", "none");
+        }
 
         //temp code
         domStyle.set(this.limTool.domNode, "display", "none");
@@ -668,6 +773,9 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             domStyle.set(this.mmTool.domNode, "display", "none");
         }
 
+        if (this.config.report) {
+            domStyle.set(this.reportTool.domNode, "display", "none");
+        }
         //temp code
         domStyle.set(this.limTool.domNode, "display", "none");
 
@@ -801,6 +909,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             this._mapUtil.clearResultsFromMap(this.map);
         }
         this._destoryMailMerge();
+        this._destroyReport();
         this.inherited(arguments);
     },
     _getMailMergeData: function () {
@@ -864,6 +973,51 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
             this.mailMergeWin.close();
         }
     },
+
+    _getReportToolFeatures: function () {
+
+        var selectedItems = this.multiRecordsView.selection.getSelected();
+        var selectedFeatures = [];
+        var response = this._getResponseInContext();
+        array.forEach(selectedItems, lang.hitch(this, function (item) {
+            var rowIndex = this.multiRecordsView.getItemIndex(item);
+            rowIndex = this._getActualIndexInStore(rowIndex, this.multiRecordsView);
+            selectedFeatures.push(response.features[rowIndex]);
+        }));
+
+        return selectedFeatures;
+    },
+        
+    _showReportTool: function () {
+        var report = new Report();
+        this.reportWin = new Popup({
+            titleLabel: "Reports",
+            content: report,
+            autoHeight: true,
+            showOverlay: false,
+            width: 600,
+            buttons: [
+                {
+                    label: "Generate Report",
+                    onClick: lang.hitch(this, function () {
+                        report.execute(this._getReportToolFeatures()).then(lang.hitch(this, function (obj) {
+                            this.reportWin.close();
+                            this.reportWin = null;
+                            report.destroy();
+                        }));
+                    })
+                }
+            ]
+        });
+        report.setMap(this.map);
+    },
+
+    _destroyReport: function () {
+        if (this.reportWin) {
+            this.reportWin.close();
+        }
+    },
+
     _setVersionTitle: function () {
         var labelNode = this._getLabelNode(this);
 
@@ -894,6 +1048,50 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         }
         return labelNode;
 
+    },
+    _checkWidgetExistsUsingPropName: function (propNameToCheck) {
+        var widgetName = null;
+        var allWidgets = []
+        if (this.appConfig.widgetOnScreen) {
+            allWidgets = [].concat(this.appConfig.widgetOnScreen.widgets);
+        }
+        if (this.appConfig.widgetPool) {
+            allWidgets = allWidgets.concat(this.appConfig.widgetPool.widgets);
+        }
+        array.some(allWidgets, lang.hitch(this, function (widget) {
+            var isWidgetConfigured = widget.manifest ? (widget.manifest.hasOwnProperty("properties") ? (widget.manifest.properties[propNameToCheck] ? true : false) : false) : false;
+            if (isWidgetConfigured) {
+                widgetName = widget.name;
+            }
+        }));
+        return widgetName;
+    },
+    _hideWidgetPanel: function (panelId) {
+
+        if (panelId === null || panelId === '') return;
+
+        PanelManager.getInstance().closePanel(panelId);
+    },
+    _displayWidgetPanel: function (widgetName) {
+
+        if (widgetName === null || widgetName === '') return;
+
+        var widgetManager = WidgetManager.getInstance();
+        var widget = widgetManager.getWidgetsByName(widgetName);
+        var widgetLoaded = widget.length > 0;
+        
+        if (widgetLoaded) {
+            widget = widget[0];
+            if (widget.state === 'closed') {                    
+                widgetManager.openWidget(widget);
+                PanelManager.getInstance().showPanel(widget);                    
+            }
+        } else {
+            var loadWidget = this.appConfig.getConfigElementsByName(widgetName)[0];
+            if (loadWidget) {
+                this.openWidgetById(loadWidget.id);
+            } 
+        }        
     }
   });
 });
