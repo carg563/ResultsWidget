@@ -613,6 +613,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         domClass.replace(this.resetView.domNode, "active", "inactive");
         
     },
+
     _enableAttributeView: function () {
         this._isResetView = false;
         this._isAttributeView = true;
@@ -651,6 +652,7 @@ function (declare, lang, array, domStyle, domClass, on, aspect,topic, domQuery, 
         }
         this.resize();
     },
+
     _enableTabularView:function(){
         this._isResetView = false;
         this._isAttributeView = false;
