@@ -113,8 +113,8 @@ function (declare, lang, array, on, domStyle, BaseWidget, _TemplatedMixin, _Widg
             var params = { 
                 ReportId: this.reportList.value, 
                 ObjectIds: data.map(function (f) { return f.attributes.OBJECTID }).join(),
-                GenerateExcel: (this.includeExcel.checked),
-                BufferSize: parseFloat(this.bufferSize.value)
+                GenerateExcel: (form.includeExcel && form.includeExcel.length > 0),
+                BufferSize: parseFloat(form.bufferSize)
             };
             
             if (this.reportList.value === 'zonepim') {
@@ -137,11 +137,12 @@ function (declare, lang, array, on, domStyle, BaseWidget, _TemplatedMixin, _Widg
 
                                 if (output.value.ReportsUrls.indexOf('|') > -1) {
 
-                                    // window.open(output.value.ReportsUrls.split('|')[1], '_blank');
-                                    window.open(output.value.ReportsUrls.split('|')[0], '_blank');
+                                    window.open(output.value.ReportsUrls.split('|')[1]);
+                                    window.open(output.value.ReportsUrls.split('|')[0]);
+                                    
                                 }
                                 else {
-                                    window.open(output.value.ReportsUrls, '_blank');
+                                    window.open(output.value.ReportsUrls);
                                 }
                             }
                         }
